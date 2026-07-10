@@ -1,11 +1,9 @@
 import { CanActivate, ExecutionContext } from '@nestjs/common';
 import { EnvironmentService } from '../../../integrations/environment/environment.service';
-import { LicenseService } from "../license.service";
-import { WorkspaceRepo } from "../../../database/repos/workspace/workspace.repo";
+import { LicenseCheckService } from '../../../integrations/environment/license-check.service';
 export declare class LicenseGuard implements CanActivate {
     private environmentService;
-    private readonly licenseService;
-    private readonly workspaceRepo;
-    constructor(environmentService: EnvironmentService, licenseService: LicenseService, workspaceRepo: WorkspaceRepo);
+    private readonly licenseCheckService;
+    constructor(environmentService: EnvironmentService, licenseCheckService: LicenseCheckService);
     canActivate(context: ExecutionContext): Promise<boolean>;
 }

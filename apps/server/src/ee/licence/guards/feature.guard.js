@@ -13,18 +13,16 @@ exports.FeatureGuard = exports.RequireFeature = exports.REQUIRED_FEATURE_KEY = v
 const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
 const environment_service_1 = require("../../../integrations/environment/environment.service");
-const license_service_1 = require("../license.service");
-const workspace_repo_1 = require("../../../database/repos/workspace/workspace.repo");
+const license_check_service_1 = require("../../../integrations/environment/license-check.service");
 const feature_registry_1 = require("../feature-registry");
 exports.REQUIRED_FEATURE_KEY = 'requiredFeature';
 const RequireFeature = (feature) => (0, common_1.SetMetadata)(exports.REQUIRED_FEATURE_KEY, feature);
 exports.RequireFeature = RequireFeature;
 let FeatureGuard = class FeatureGuard {
-    constructor(reflector, environmentService, licenseService, workspaceRepo) {
+    constructor(reflector, environmentService, licenseCheckService) {
         this.reflector = reflector;
         this.environmentService = environmentService;
-        this.licenseService = licenseService;
-        this.workspaceRepo = workspaceRepo;
+        this.licenseCheckService = licenseCheckService;
     }
     async canActivate(context) {
         const requiredFeature = this.reflector.getAllAndOverride(exports.REQUIRED_FEATURE_KEY, [context.getHandler(), context.getClass()]);
@@ -40,22 +38,16 @@ let FeatureGuard = class FeatureGuard {
             return true;
         }
         let licenseKey = request.raw?.workspace?.licenseKey;
-        if (!licenseKey) {
-            const workspaceId = request?.user?.workspace?.id;
-            if (workspaceId) {
-                licenseKey = await this.workspaceRepo.findLicenseKeyById(workspaceId);
-            }
-        }
         if (!requiredFeature) {
-            if (this.licenseService.isValidEELicense(licenseKey)) {
+            if (this.licenseCheckService.isValidEELicense(licenseKey)) {
                 return true;
             }
             throw new common_1.ForbiddenException('This feature requires a valid license.');
         }
-        if (this.licenseService.hasFeature(licenseKey, requiredFeature)) {
+        if (this.licenseCheckService.hasFeature(licenseKey, requiredFeature)) {
             return true;
         }
-        if (this.licenseService.isValidEELicense(licenseKey)) {
+        if (this.licenseCheckService.isValidEELicense(licenseKey)) {
             throw new common_1.ForbiddenException('This feature requires a higher-tier license.');
         }
         throw new common_1.ForbiddenException('This feature requires a valid license.');
@@ -66,7 +58,6 @@ exports.FeatureGuard = FeatureGuard = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [core_1.Reflector,
         environment_service_1.EnvironmentService,
-        license_service_1.LicenseService,
-        workspace_repo_1.WorkspaceRepo])
+        license_check_service_1.LicenseCheckService])
 ], FeatureGuard);
 //# sourceMappingURL=feature.guard.js.map

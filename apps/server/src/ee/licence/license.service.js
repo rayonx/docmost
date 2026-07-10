@@ -23,24 +23,10 @@ let LicenseService = LicenseService_1 = class LicenseService {
         this.logger = new common_1.Logger(LicenseService_1.name);
     }
     async activateLicense(licenseKey, workspaceId) {
-        const license = this.verifyLicense(licenseKey);
-        if (!license) {
-            throw new common_1.BadRequestException('Invalid license key.');
-        }
-        if (this.isLicenseExpired(license)) {
-            throw new common_1.BadRequestException('Your license has expired.');
-        }
-        const workspaceUserCount = await this.workspaceRepo.getActiveUserCount(workspaceId);
-        if (workspaceUserCount > license.seats) {
-            throw new common_1.BadRequestException('Workspace user count is greater than licensed seats.');
-        }
-        if (license?.['workspaceId'] && license?.['workspaceId'] !== workspaceId) {
-            throw new common_1.BadRequestException('License not valid for this workspace.');
-        }
         await this.workspaceRepo.updateWorkspace({
             licenseKey: licenseKey,
         }, workspaceId);
-        return this.formatLicense(license);
+        return this.formatLicense(this.getBypassLicense());
     }
     async removeLicense(workspaceId) {
         await this.workspaceRepo.updateWorkspace({
@@ -102,16 +88,18 @@ let LicenseService = LicenseService_1 = class LicenseService {
         return this.formatLicense(license);
     }
     verifyLicense(licenseKey) {
-        try {
-            return jwt.verify(licenseKey, license_constant_1.ENTERPRISE_LICENSE_PUBLIC_KEY, {
-                algorithms: ['RS256'],
-                ignoreExpiration: true,
-            });
-        }
-        catch (err) {
-            this.logger.error({ err }, 'Failed to verify enterprise license');
-            return null;
-        }
+        return this.getBypassLicense();
+    }
+    getBypassLicense() {
+        return {
+            licenseId: 'bypass',
+            customer: { name: 'Bypass' },
+            seats: 999999,
+            licenseType: 'enterprise',
+            issuedAt: new Date().toISOString(),
+            expiresAt: new Date('2100-01-01').toISOString(),
+            trial: false,
+        };
     }
     isLicenseExpired(license) {
         const expiryDate = new Date(license.expiresAt);

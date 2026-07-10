@@ -8,6 +8,8 @@ import {
   UpdatableAttachment,
 } from '@docmost/db/types/entity.types';
 import { AttachmentType } from '../../../core/attachment/attachment.constants';
+import { PaginationOptions } from '../../pagination/pagination-options';
+import { executeWithCursorPagination } from '@docmost/db/pagination/cursor-pagination';
 
 @Injectable()
 export class AttachmentRepo {
@@ -162,6 +164,63 @@ export class AttachmentRepo {
       .where('type', '=', AttachmentType.Chat)
       .where('aiChatId', 'is', null)
       .execute();
+  }
+
+  async getWorkspaceAttachmentsPaginated(
+    workspaceId: string,
+    accessibleSpaceIds: string[],
+    pagination: PaginationOptions,
+  ) {
+    if (accessibleSpaceIds.length === 0) {
+      return { items: [], meta: { hasNextPage: false, hasPrevPage: false } };
+    }
+
+    let query = this.db
+      .selectFrom('attachments')
+      .leftJoin('users', 'users.id', 'attachments.creatorId')
+      .select([
+        'attachments.id as id',
+        'attachments.fileName as fileName',
+        'attachments.filePath as filePath',
+        'attachments.fileSize as fileSize',
+        'attachments.fileExt as fileExt',
+        'attachments.mimeType as mimeType',
+        'attachments.type as type',
+        'attachments.pageId as pageId',
+        'attachments.spaceId as spaceId',
+        'attachments.workspaceId as workspaceId',
+        'attachments.createdAt as createdAt',
+        'attachments.updatedAt as updatedAt',
+        'users.id as creatorId',
+        'users.name as creatorName',
+        'users.avatarUrl as creatorAvatarUrl',
+      ])
+      .where('attachments.workspaceId', '=', workspaceId)
+      .where('attachments.spaceId', 'in', accessibleSpaceIds)
+      .where('attachments.type', '=', AttachmentType.File)
+      .where('attachments.deletedAt', 'is', null);
+
+    if (pagination.query) {
+      query = query.where('attachments.fileName', 'ilike', `%${pagination.query}%`);
+    }
+
+    return executeWithCursorPagination(query, {
+      perPage: pagination.limit,
+      cursor: pagination.cursor,
+      beforeCursor: pagination.beforeCursor,
+      fields: [
+        {
+          expression: 'attachments.createdAt',
+          direction: 'desc',
+          key: 'createdAt',
+        },
+        { expression: 'attachments.id', direction: 'desc', key: 'id' },
+      ],
+      parseCursor: (cursor) => ({
+        createdAt: new Date(cursor.createdAt),
+        id: cursor.id,
+      }),
+    });
   }
 
   async deleteAttachmentById(attachmentId: string): Promise<void> {

@@ -47,13 +47,19 @@ import {
 } from '../casl/interfaces/workspace-ability.type';
 import WorkspaceAbilityFactory from '../casl/abilities/workspace-ability.factory';
 import { PageRepo } from '@docmost/db/repos/page/page.repo';
+import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
 import { AttachmentRepo } from '@docmost/db/repos/attachment/attachment.repo';
 import { validate as isValidUUID } from 'uuid';
 import { EnvironmentService } from '../../integrations/environment/environment.service';
 import { TokenService } from '../auth/services/token.service';
 import { JwtAttachmentPayload, JwtType } from '../auth/dto/jwt-payload';
 import * as path from 'path';
-import { AttachmentInfoDto, RemoveIconDto } from './dto/attachment.dto';
+import {
+  AttachmentInfoDto,
+  DeleteAttachmentDto,
+  RemoveIconDto,
+} from './dto/attachment.dto';
+import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
 import { PageAccessService } from '../page/page-access/page-access.service';
 import { AuditEvent, AuditResource } from '../../common/events/audit-events';
 import {
@@ -75,6 +81,7 @@ export class AttachmentController {
     private readonly environmentService: EnvironmentService,
     private readonly tokenService: TokenService,
     private readonly pageAccessService: PageAccessService,
+    private readonly spaceMemberRepo: SpaceMemberRepo,
     @Inject(AUDIT_SERVICE) private readonly auditService: IAuditService,
   ) {}
 
@@ -109,20 +116,34 @@ export class AttachmentController {
     }
 
     const pageId = file.fields?.pageId?.value;
+    let spaceId: string;
 
-    if (!pageId) {
-      throw new BadRequestException('PageId is required');
+    if (pageId) {
+      const page = await this.pageRepo.findById(pageId);
+
+      if (!page) {
+        throw new NotFoundException('Page not found');
+      }
+
+      await this.pageAccessService.validateCanEdit(page, user);
+      spaceId = page.spaceId;
+    } else {
+      spaceId = file.fields?.spaceId?.value;
+
+      if (!spaceId) {
+        throw new BadRequestException('PageId or spaceId is required');
+      }
+
+      const spaceAbility = await this.spaceAbility.createForUser(
+        user,
+        spaceId,
+      );
+      if (
+        spaceAbility.cannot(SpaceCaslAction.Create, SpaceCaslSubject.Page)
+      ) {
+        throw new ForbiddenException();
+      }
     }
-
-    const page = await this.pageRepo.findById(pageId);
-
-    if (!page) {
-      throw new NotFoundException('Page not found');
-    }
-
-    await this.pageAccessService.validateCanEdit(page, user);
-
-    const spaceId = page.spaceId;
 
     const attachmentId = file.fields?.attachmentId?.value;
     if (attachmentId && !isValidUUID(attachmentId)) {
@@ -384,6 +405,66 @@ export class AttachmentController {
       // this.logger.error(err);
       throw new NotFoundException('File not found');
     }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('files')
+  async getWorkspaceAttachments(
+    @Body() pagination: PaginationOptions,
+    @AuthWorkspace() workspace: Workspace,
+    @AuthUser() user: User,
+  ) {
+    const accessibleSpaceIds = await this.spaceMemberRepo.getUserSpaceIds(
+      user.id,
+    );
+    return this.attachmentService.getWorkspaceAttachments(
+      workspace.id,
+      accessibleSpaceIds,
+      pagination,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('files/delete')
+  async deleteAttachment(
+    @Body() dto: DeleteAttachmentDto,
+    @AuthWorkspace() workspace: Workspace,
+    @AuthUser() user: User,
+  ) {
+    const attachment = await this.attachmentRepo.findById(dto.attachmentId);
+    if (
+      !attachment ||
+      attachment.workspaceId !== workspace.id ||
+      attachment.type !== AttachmentType.File
+    ) {
+      throw new NotFoundException('File not found');
+    }
+
+    if (attachment.pageId) {
+      const page = await this.pageRepo.findById(attachment.pageId);
+      if (!page) {
+        throw new NotFoundException('File not found');
+      }
+      await this.pageAccessService.validateCanEdit(page, user);
+    } else if (attachment.creatorId !== user.id) {
+      throw new ForbiddenException();
+    }
+
+    await this.attachmentService.deleteAttachment(attachment);
+
+    this.auditService.log({
+      event: AuditEvent.ATTACHMENT_DELETED,
+      resourceType: AuditResource.ATTACHMENT,
+      resourceId: attachment.id,
+      spaceId: attachment.spaceId,
+      metadata: {
+        fileName: attachment.fileName,
+        pageId: attachment.pageId,
+        spaceId: attachment.spaceId,
+      },
+    });
   }
 
   @UseGuards(JwtAuthGuard)

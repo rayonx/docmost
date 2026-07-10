@@ -32,6 +32,7 @@ import ShareLayout from "@/features/share/components/share-layout.tsx";
 import ShareRedirect from "@/pages/share/share-redirect.tsx";
 import { useTrackOrigin } from "@/hooks/use-track-origin";
 import SpacesPage from "@/pages/spaces/spaces.tsx";
+import FilesPage from "@/pages/files/files.tsx";
 import { MfaChallengePage } from "@/ee/mfa/pages/mfa-challenge-page";
 import { MfaSetupRequiredPage } from "@/ee/mfa/pages/mfa-setup-required-page";
 import SpaceTrash from "@/pages/space/space-trash.tsx";
@@ -93,6 +94,7 @@ export default function App() {
           <Route path={"/ai"} element={<AiChat />} />
           <Route path={"/ai/chat/:chatId"} element={<AiChat />} />
           <Route path={"/spaces"} element={<SpacesPage />} />
+          <Route path={"/files"} element={<FilesPage />} />
           <Route path={"/favorites"} element={<FavoritesPage />} />
           <Route path={"/labels/:labelName"} element={<LabelPage />} />
           <Route path={"/templates"} element={<TemplateList />} />

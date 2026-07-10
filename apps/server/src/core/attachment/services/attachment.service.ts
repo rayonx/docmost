@@ -27,6 +27,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { QueueJob, QueueName } from '../../../integrations/queue/constants';
 import { Queue } from 'bullmq';
 import { createByteCountingStream } from '../../../common/helpers/utils';
+import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
 
 @Injectable()
 export class AttachmentService {
@@ -460,5 +461,22 @@ export class AttachmentService {
     }
 
     await this.workspaceRepo.updateWorkspace({ logo: null }, workspace.id);
+  }
+
+  async getWorkspaceAttachments(
+    workspaceId: string,
+    accessibleSpaceIds: string[],
+    pagination: PaginationOptions,
+  ) {
+    return this.attachmentRepo.getWorkspaceAttachmentsPaginated(
+      workspaceId,
+      accessibleSpaceIds,
+      pagination,
+    );
+  }
+
+  async deleteAttachment(attachment: Attachment) {
+    await this.storageService.delete(attachment.filePath);
+    await this.attachmentRepo.deleteAttachmentById(attachment.id);
   }
 }

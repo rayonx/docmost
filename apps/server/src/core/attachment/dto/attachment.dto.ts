@@ -7,6 +7,12 @@ export class AttachmentInfoDto {
   attachmentId: string;
 }
 
+export class DeleteAttachmentDto {
+  @IsNotEmpty()
+  @IsUUID()
+  attachmentId: string;
+}
+
 export class RemoveIconDto {
   @IsEnum(AttachmentType)
   @IsIn([

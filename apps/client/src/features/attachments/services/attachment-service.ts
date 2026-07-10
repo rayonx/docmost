@@ -3,7 +3,36 @@ import loadImage from "blueimp-load-image";
 import {
   AvatarIconType,
   IAttachment,
+  IWorkspaceAttachment,
 } from "@/features/attachments/types/attachment.types.ts";
+import { IPagination, QueryParams } from "@/lib/types.ts";
+
+export async function getWorkspaceAttachments(
+  params?: QueryParams,
+): Promise<IPagination<IWorkspaceAttachment>> {
+  const req = await api.post("/files", params);
+  return req.data;
+}
+
+export async function deleteAttachment(attachmentId: string): Promise<void> {
+  await api.post("/files/delete", { attachmentId });
+}
+
+export async function uploadFileToSpace(
+  file: File,
+  spaceId: string,
+): Promise<IWorkspaceAttachment> {
+  const formData = new FormData();
+  formData.append("spaceId", spaceId);
+  formData.append("file", file);
+
+  const req = await api.post("/files/upload", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return req.data;
+}
 
 async function compressAndResizeIcon(
   file: File,

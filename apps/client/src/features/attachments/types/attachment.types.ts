@@ -15,6 +15,24 @@ export interface IAttachment {
   deletedAt: string | null;
 }
 
+export interface IWorkspaceAttachment {
+  id: string;
+  fileName: string;
+  filePath: string;
+  fileSize: number;
+  fileExt: string;
+  mimeType: string;
+  type: string;
+  pageId: string | null;
+  spaceId: string | null;
+  workspaceId: string;
+  createdAt: string;
+  updatedAt: string;
+  creatorId: string | null;
+  creatorName: string | null;
+  creatorAvatarUrl: string | null;
+}
+
 export enum AvatarIconType {
   AVATAR = "avatar",
   SPACE_ICON = "space-icon",

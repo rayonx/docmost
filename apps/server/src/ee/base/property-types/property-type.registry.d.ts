@@ -1,0 +1,22 @@
+import { z } from 'zod';
+import { type BasePropertyTypeValue } from '../base.schemas';
+import { type PropertyKindValue } from '../engine/kinds';
+import type { FormulaResultType } from "@docmost/base-formula/server";
+import type { ServerPropertyTypeDescriptor, SystemColumn } from './property-type.descriptor';
+import { type CellCsvContext } from './csv-format';
+export declare const PROPERTY_TYPE_REGISTRY: Record<BasePropertyTypeValue, ServerPropertyTypeDescriptor>;
+export declare function getDescriptor(type: string): ServerPropertyTypeDescriptor | undefined;
+export declare function propertyKind(type: string): PropertyKindValue | null;
+export declare const SYSTEM_PROPERTY_TYPES: ReadonlySet<string>;
+export declare function isSystemPropertyType(type: string): boolean;
+export declare const USER_PROPERTY_TYPES: readonly BasePropertyTypeValue[];
+export declare function systemColumnFor(type: string): SystemColumn | undefined;
+export declare function formulaResultType(type: string): FormulaResultType;
+export declare function serializeCellForCsv(property: {
+    type: string;
+    typeOptions?: unknown;
+}, value: unknown, ctx: CellCsvContext): string;
+export declare function validateTypeOptions(type: BasePropertyTypeValue, typeOptions: unknown): z.ZodSafeParseResult<unknown>;
+export declare function parseTypeOptions(type: BasePropertyTypeValue, typeOptions: unknown): unknown;
+export declare function getCellValueSchema(type: BasePropertyTypeValue): z.ZodType | undefined;
+export declare function validateCellValue(type: BasePropertyTypeValue, value: unknown, typeOptions?: unknown): z.ZodSafeParseResult<unknown>;

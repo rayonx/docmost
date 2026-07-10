@@ -1,0 +1,53 @@
+import { BadRequestException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Queue } from 'bullmq';
+import { KyselyDB } from "../../../database/types/kysely.types";
+import { BasePropertyRepo } from "../repos/base-property.repo";
+import { BaseRowRepo } from "../repos/base-row.repo";
+import { BaseRepo } from "../repos/base.repo";
+import { BaseViewRepo } from "../repos/base-view.repo";
+import { CreatePropertyDto } from '../dto/create-property.dto';
+import { UpdatePropertyDto, DeletePropertyDto, ReorderPropertyDto } from '../dto/update-property.dto';
+import { FormulaService } from '../formula/formula.service';
+export declare class BasePropertyService {
+    private readonly db;
+    private readonly basePropertyRepo;
+    private readonly baseRowRepo;
+    private readonly baseRepo;
+    private readonly baseViewRepo;
+    private readonly baseQueue;
+    private readonly eventEmitter;
+    private readonly formulaService;
+    private readonly logger;
+    constructor(db: KyselyDB, basePropertyRepo: BasePropertyRepo, baseRowRepo: BaseRowRepo, baseRepo: BaseRepo, baseViewRepo: BaseViewRepo, baseQueue: Queue, eventEmitter: EventEmitter2, formulaService: FormulaService);
+    create(workspaceId: string, dto: CreatePropertyDto, actorId?: string): Promise<any>;
+    update(dto: UpdatePropertyDto, workspaceId: string, actorId?: string): Promise<{
+        property: {
+            type: string;
+            id: string;
+            workspaceId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            deletedAt: Date;
+            name: string;
+            position: string;
+            pageId: string;
+            isPrimary: boolean;
+            pendingType: string;
+            pendingTypeOptions: import("../../../database/types/db").JsonValue;
+            pendingToken: string;
+            schemaVersion: number;
+            typeOptions: import("../../../database/types/db").JsonValue;
+        };
+        jobId: string;
+    }>;
+    private ensureNameUnique;
+    private mapDuplicateName;
+    private revertDelete;
+    private loadAndEmit;
+    private countRowsToConvert;
+    delete(dto: DeletePropertyDto, workspaceId: string, actorId?: string): Promise<void>;
+    reorder(dto: ReorderPropertyDto, workspaceId: string, actorId?: string): Promise<void>;
+}
+export declare function isUniqueViolation(err: unknown): boolean;
+export declare function duplicateNameError(name: string): BadRequestException;

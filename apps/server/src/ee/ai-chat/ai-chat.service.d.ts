@@ -1,0 +1,60 @@
+import { AiChatRepo } from './ai-chat.repo';
+import { AiChatToolsService } from './ai-chat-tools.service';
+import { AiChat, AiChatMessage, User, Workspace } from "../../database/types/entity.types";
+import { PageRepo } from "../../database/repos/page/page.repo";
+import { AttachmentRepo } from "../../database/repos/attachment/attachment.repo";
+import { PageAccessService } from '../../core/page/page-access/page-access.service';
+import { EnvironmentService } from '../../integrations/environment/environment.service';
+import { StorageService } from '../../integrations/storage/storage.service';
+import { AttachmentEeService } from '../attachments-ee/attachment-ee.service';
+import { AiConfig } from '../ai/drivers/interfaces/ai-config.interface';
+import type { AiChatStreamEvent } from './types/ai-chat.types';
+import { Queue } from 'bullmq';
+export declare class AiChatService {
+    private readonly chatRepo;
+    private readonly toolsService;
+    private readonly pageRepo;
+    private readonly attachmentRepo;
+    private readonly pageAccessService;
+    private readonly environmentService;
+    private readonly storageService;
+    private readonly attachmentEeService;
+    private readonly aiConfig;
+    private readonly attachmentQueue;
+    private readonly logger;
+    constructor(chatRepo: AiChatRepo, toolsService: AiChatToolsService, pageRepo: PageRepo, attachmentRepo: AttachmentRepo, pageAccessService: PageAccessService, environmentService: EnvironmentService, storageService: StorageService, attachmentEeService: AttachmentEeService, aiConfig: AiConfig | null, attachmentQueue: Queue);
+    createChat(userId: string, workspaceId: string, title?: string): Promise<AiChat>;
+    getChat(chatId: string, userId: string, workspaceId: string): Promise<AiChat>;
+    getChatWithMessages(chatId: string, userId: string, workspaceId: string): Promise<{
+        chat: AiChat;
+        messages: AiChatMessage[];
+    }>;
+    deleteChat(chatId: string, userId: string, workspaceId: string): Promise<void>;
+    updateChatTitle(chatId: string, userId: string, workspaceId: string, title: string): Promise<void>;
+    sendMessage(user: User, workspace: Workspace, params: {
+        chatId?: string;
+        content: string;
+        mentionedPageIds?: string[];
+        contextPageId?: string;
+        attachmentIds?: string[];
+    }, abortSignal?: AbortSignal): AsyncGenerator<AiChatStreamEvent>;
+    private compressOlderHistory;
+    private saveAssistantMessage;
+    private resolveLanguageModel;
+    private getChatModelName;
+    private buildSystemPrompt;
+    private buildModelMessages;
+    private injectMentionedPageContext;
+    private fetchMentionedPages;
+    uploadChatFile(filePromise: any, userId: string, workspaceId: string, chatId?: string): Promise<{
+        id: string;
+        fileName: string;
+        fileExt: string;
+        fileSize: number;
+        mimeType: string;
+    }>;
+    private extractTextContent;
+    private fetchAttachments;
+    private resolveAttachmentsFromMetadata;
+    private injectAttachmentContext;
+}

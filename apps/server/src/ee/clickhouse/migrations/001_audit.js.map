@@ -1,0 +1,1 @@
+{"version":3,"file":"001_audit.js","sourceRoot":"","sources":["../../../../src/ee/clickhouse/migrations/001_audit.ts"],"names":[],"mappings":";;AAEA,gBAwBC;AAxBM,KAAK,UAAU,EAAE,CAAC,MAAwB;IAC/C,MAAM,MAAM,CAAC,OAAO,CAAC;QACnB,KAAK,EAAE;;;;;;;;;;;;;;;;;;;;KAoBN;KACF,CAAC,CAAC;AACL,CAAC"}

@@ -1,0 +1,10 @@
+import { Expression, ExpressionBuilder, SqlBool } from 'kysely';
+import { DB } from '@docmost/db/types/db';
+import { BaseProperty } from "../../../database/types/entity.types";
+import { FilterNode } from './schema.zod';
+export type PropertySchema = Map<string, Pick<BaseProperty, 'id' | 'type' | 'typeOptions'>>;
+type Eb = ExpressionBuilder<DB, 'baseRows'>;
+declare const TRUE: import("kysely").RawBuilder<SqlBool>;
+declare const FALSE: import("kysely").RawBuilder<SqlBool>;
+export declare function buildWhere(eb: Eb, node: FilterNode, schema: PropertySchema): Expression<SqlBool>;
+export { TRUE as TRUE_EXPR, FALSE as FALSE_EXPR };

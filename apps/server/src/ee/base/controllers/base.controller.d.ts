@@ -1,0 +1,98 @@
+import { FastifyReply } from 'fastify';
+import { BaseService } from '../services/base.service';
+import { BaseCsvExportService } from '../services/base-csv-export.service';
+import { BasePageResolverService } from '../services/base-page-resolver.service';
+import { BaseRepo } from "../repos/base.repo";
+import { CreateBaseDto } from '../dto/create-base.dto';
+import { UpdateBaseDto } from '../dto/update-base.dto';
+import { BaseIdDto } from '../dto/base.dto';
+import { ConvertBaseDto } from '../dto/convert-base.dto';
+import { ExportBaseCsvDto } from '../dto/export-base.dto';
+import { ResolvePagesDto } from '../dto/resolve-pages.dto';
+import { PaginationOptions } from "../../../database/pagination/pagination-options";
+import { User, Workspace } from "../../../database/types/entity.types";
+import SpaceAbilityFactory from '../../../core/casl/abilities/space-ability.factory';
+import { SpaceIdDto } from '../../../core/space/dto/space-id.dto';
+import { PageAccessService } from '../../../core/page/page-access/page-access.service';
+import { PagePermissionRepo } from "../../../database/repos/page/page-permission.repo";
+import { PageRepo } from "../../../database/repos/page/page.repo";
+export declare class BaseController {
+    private readonly baseService;
+    private readonly baseCsvExportService;
+    private readonly basePageResolverService;
+    private readonly baseRepo;
+    private readonly spaceAbility;
+    private readonly pageAccessService;
+    private readonly pagePermissionRepo;
+    private readonly pageRepo;
+    constructor(baseService: BaseService, baseCsvExportService: BaseCsvExportService, basePageResolverService: BasePageResolverService, baseRepo: BaseRepo, spaceAbility: SpaceAbilityFactory, pageAccessService: PageAccessService, pagePermissionRepo: PagePermissionRepo, pageRepo: PageRepo);
+    create(dto: CreateBaseDto, user: User, workspace: Workspace): Promise<import("@docmost/ee/base/repos/base.repo").BasePage>;
+    getBase(dto: BaseIdDto, user: User): Promise<{
+        permissions: {
+            canEdit: boolean;
+            hasRestriction: boolean;
+        };
+        id: string;
+        workspaceId: string;
+        creatorId: string;
+        title: string;
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date;
+        content: import("../../../database/types/db").JsonValue;
+        tsv: string;
+        spaceId: string;
+        contributorIds: string[];
+        coverPhoto: string;
+        deletedById: string;
+        icon: string;
+        isBase: boolean;
+        baseSchemaVersion: number;
+        isLocked: boolean;
+        lastUpdatedById: string;
+        parentPageId: string;
+        position: string;
+        slugId: string;
+        textContent: string;
+        ydoc: Buffer<ArrayBufferLike>;
+        properties?: unknown[];
+        views?: unknown[];
+    }>;
+    convert(dto: ConvertBaseDto, user: User, workspace: Workspace): Promise<import("@docmost/ee/base/repos/base.repo").BasePage>;
+    update(dto: UpdateBaseDto, user: User): Promise<import("@docmost/ee/base/repos/base.repo").BasePage>;
+    delete(dto: BaseIdDto, user: User): Promise<void>;
+    list(dto: SpaceIdDto, pagination: PaginationOptions, user: User): Promise<{
+        items: ({
+            id: string;
+            workspaceId: string;
+            creatorId: string;
+            title: string;
+            createdAt: Date;
+            updatedAt: Date;
+            deletedAt: Date;
+            spaceId: string;
+            contributorIds: string[];
+            coverPhoto: string;
+            deletedById: string;
+            icon: string;
+            isBase: boolean;
+            baseSchemaVersion: number;
+            isLocked: boolean;
+            lastUpdatedById: string;
+            parentPageId: string;
+            position: string;
+            slugId: string;
+        } & {})[];
+        meta: {
+            limit: number;
+            hasNextPage: boolean;
+            hasPrevPage: boolean;
+            nextCursor: string | null;
+            prevCursor: string | null;
+        };
+    }>;
+    exportCsv(dto: ExportBaseCsvDto, user: User, workspace: Workspace, res: FastifyReply): Promise<void>;
+    resolvePages(dto: ResolvePagesDto, user: User, workspace: Workspace): Promise<{
+        items: import("../services/base-page-resolver.service").ResolvedPage[];
+    }>;
+}

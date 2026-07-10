@@ -1,0 +1,69 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.stripPropertyFromViewConfig = stripPropertyFromViewConfig;
+function isGroup(node) {
+    return 'children' in node;
+}
+function pruneFilter(node, propertyId) {
+    if (isGroup(node)) {
+        const kept = node.children
+            .map((c) => pruneFilter(c, propertyId))
+            .filter((c) => c !== null);
+        return kept.length === 0 ? null : { op: node.op, children: kept };
+    }
+    return node.propertyId === propertyId ? null : node;
+}
+function stripPropertyFromViewConfig(config, propertyId) {
+    if (!config)
+        return {};
+    const next = { ...config };
+    if (config.sorts) {
+        const sorts = config.sorts.filter((s) => s.propertyId !== propertyId);
+        if (sorts.length > 0)
+            next.sorts = sorts;
+        else
+            delete next.sorts;
+    }
+    if (config.filter) {
+        const pruned = pruneFilter(config.filter, propertyId);
+        if (pruned)
+            next.filter = pruned;
+        else
+            delete next.filter;
+    }
+    if (config.groupByPropertyId === propertyId) {
+        delete next.groupByPropertyId;
+        delete next.hiddenChoiceIds;
+        delete next.choiceOrder;
+    }
+    if (config.visiblePropertyIds) {
+        const kept = config.visiblePropertyIds.filter((id) => id !== propertyId);
+        if (kept.length > 0)
+            next.visiblePropertyIds = kept;
+        else
+            delete next.visiblePropertyIds;
+    }
+    if (config.hiddenPropertyIds) {
+        const kept = config.hiddenPropertyIds.filter((id) => id !== propertyId);
+        if (kept.length > 0)
+            next.hiddenPropertyIds = kept;
+        else
+            delete next.hiddenPropertyIds;
+    }
+    if (config.propertyOrder) {
+        const kept = config.propertyOrder.filter((id) => id !== propertyId);
+        if (kept.length > 0)
+            next.propertyOrder = kept;
+        else
+            delete next.propertyOrder;
+    }
+    if (config.propertyWidths && propertyId in config.propertyWidths) {
+        const { [propertyId]: _removed, ...rest } = config.propertyWidths;
+        if (Object.keys(rest).length > 0)
+            next.propertyWidths = rest;
+        else
+            delete next.propertyWidths;
+    }
+    return next;
+}
+//# sourceMappingURL=strip-property-from-view-config.js.map

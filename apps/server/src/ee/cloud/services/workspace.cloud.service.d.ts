@@ -1,0 +1,71 @@
+import { KyselyDB } from "../../../database/types/kysely.types";
+import { EnvironmentService } from '../../../integrations/environment/environment.service';
+import { User, Workspace } from "../../../database/types/entity.types";
+import { SignupService } from '../../../core/auth/services/signup.service';
+import { ManageSsoService } from "../../sso/services/manage-sso.service";
+import { TokenService } from '../../../core/auth/services/token.service';
+import { SessionService } from '../../../core/session/session.service';
+import { CreateCloudWorkspaceDto } from "../dto/create-workspace.dto";
+import { MailService } from '../../../integrations/mail/mail.service';
+import { DomainService } from '../../../integrations/environment/domain.service';
+import { UserTokenRepo } from "../../../database/repos/user-token/user-token.repo";
+import { UserRepo } from "../../../database/repos/user/user.repo";
+export declare class WorkspaceCloudService {
+    private readonly signupService;
+    private readonly tokenService;
+    private readonly sessionService;
+    private readonly manageSsoService;
+    private readonly mailService;
+    private readonly domainService;
+    private readonly userTokenRepo;
+    private readonly userRepo;
+    private readonly environmentService;
+    private readonly db;
+    constructor(signupService: SignupService, tokenService: TokenService, sessionService: SessionService, manageSsoService: ManageSsoService, mailService: MailService, domainService: DomainService, userTokenRepo: UserTokenRepo, userRepo: UserRepo, environmentService: EnvironmentService, db: KyselyDB);
+    createWorkspace(dto: CreateCloudWorkspaceDto): Promise<{
+        workspace: {
+            hostname: string;
+            description: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            deletedAt: Date;
+            auditRetentionDays: number;
+            trashRetentionDays: number;
+            billingEmail: string;
+            customDomain: string;
+            defaultRole: string;
+            defaultSpaceId: string;
+            emailDomains: string[];
+            enforceMfa: boolean;
+            enforceSso: boolean;
+            isScimEnabled: boolean;
+            licenseKey: string;
+            logo: string;
+            name: string;
+            plan: string;
+            settings: import("../../../database/types/db").JsonValue;
+            status: string;
+            stripeCustomerId: string;
+            trialEndAt: Date;
+        };
+        requiresEmailVerification: boolean;
+        emailSignature: string;
+    }>;
+    getJoinedWorkspaceList(joinedWorkspaces: string): Promise<{
+        hostname: string;
+        id: string;
+        logo: string;
+        name: string;
+    }[]>;
+    sendVerificationEmail(user: User, workspace: Workspace): Promise<void>;
+    verifyEmail(token: string, workspaceId: string): Promise<string>;
+    resendVerificationEmail(email: string, workspaceId: string, sig: string): Promise<void>;
+    findWorkspacesByEmail(email: string): Promise<void>;
+    getHostnameFromEmail(email: string): {
+        hostname: string;
+        isPublicProvider: boolean;
+    };
+    private signEmail;
+    private verifyEmailSignature;
+}

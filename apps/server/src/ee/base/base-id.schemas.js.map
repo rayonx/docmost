@@ -1,0 +1,1 @@
+{"version":3,"file":"base-id.schemas.js","sourceRoot":"","sources":["../../../src/ee/base/base-id.schemas.ts"],"names":[],"mappings":";;;AAAA,6BAAwB;AAEX,QAAA,iBAAiB,GAAG,kBAAkB,CAAC;AACvC,QAAA,eAAe,GAAG,kBAAkB,CAAC;AAErC,QAAA,gBAAgB,GAAG,OAAC,CAAC,MAAM,EAAE,CAAC,KAAK,CAAC,yBAAiB,CAAC,CAAC;AACvD,QAAA,cAAc,GAAG,OAAC,CAAC,MAAM,EAAE,CAAC,KAAK,CAAC,uBAAe,CAAC,CAAC"}

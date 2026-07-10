@@ -1,0 +1,20 @@
+import type { z } from 'zod';
+import type { BasePropertyTypeValue, CellConversionContext } from '../base.schemas';
+import type { PropertyKindValue } from '../engine/kinds';
+import type { FormulaResultType } from "@docmost/base-formula/server";
+import type { CellCsvContext } from './csv-format';
+import type { ReferenceKind } from '../reference/reference-source';
+export type SystemColumn = 'createdAt' | 'updatedAt' | 'lastUpdatedById';
+export type ServerPropertyTypeDescriptor = {
+    type: BasePropertyTypeValue;
+    kind: PropertyKindValue | null;
+    isSystem: boolean;
+    systemColumn?: SystemColumn;
+    typeOptionsSchema: z.ZodType;
+    cellValueSchema?: z.ZodType;
+    formulaResultType: FormulaResultType;
+    csvSerialize: (value: unknown, ctx: CellCsvContext, typeOptions?: unknown) => string;
+    defaultTypeOptions?: () => unknown;
+    referenceKind?: ReferenceKind;
+};
+export type { CellConversionContext };

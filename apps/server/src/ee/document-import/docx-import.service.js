@@ -18,7 +18,7 @@ const common_1 = require("@nestjs/common");
 const nestjs_kysely_1 = require("nestjs-kysely");
 const storage_service_1 = require("../../integrations/storage/storage.service");
 const environment_service_1 = require("../../integrations/environment/environment.service");
-const license_service_1 = require("../licence/license.service");
+const license_check_service_1 = require("../../integrations/environment/license-check.service");
 const feature_registry_1 = require("../licence/feature-registry");
 const attachment_utils_1 = require("../../core/attachment/attachment.utils");
 const attachment_constants_1 = require("../../core/attachment/attachment.constants");
@@ -26,10 +26,10 @@ const uuid_1 = require("uuid");
 const mammoth = require("mammoth");
 const mime = require("mime-types");
 let DocxImportService = DocxImportService_1 = class DocxImportService {
-    constructor(storageService, environmentService, licenseService, db) {
+    constructor(storageService, environmentService, licenseCheckService, db) {
         this.storageService = storageService;
         this.environmentService = environmentService;
-        this.licenseService = licenseService;
+        this.licenseCheckService = licenseCheckService;
         this.db = db;
         this.logger = new common_1.Logger(DocxImportService_1.name);
     }
@@ -40,7 +40,7 @@ let DocxImportService = DocxImportService_1 = class DocxImportService {
             .where('id', '=', workspaceId)
             .executeTakeFirst();
         if (!this.environmentService.isCloud()) {
-            if (!this.licenseService.hasFeature(workspace.licenseKey, feature_registry_1.Feature.DOCX_IMPORT)) {
+            if (!this.licenseCheckService.hasFeature(workspace.licenseKey, feature_registry_1.Feature.DOCX_IMPORT)) {
                 throw new common_1.ForbiddenException('This feature requires a valid license.');
             }
         }
@@ -100,6 +100,6 @@ exports.DocxImportService = DocxImportService = DocxImportService_1 = __decorate
     __param(3, (0, nestjs_kysely_1.InjectKysely)()),
     __metadata("design:paramtypes", [storage_service_1.StorageService,
         environment_service_1.EnvironmentService,
-        license_service_1.LicenseService, Object])
+        license_check_service_1.LicenseCheckService, Object])
 ], DocxImportService);
 //# sourceMappingURL=docx-import.service.js.map

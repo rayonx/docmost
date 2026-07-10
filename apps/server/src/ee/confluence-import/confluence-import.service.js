@@ -32,7 +32,7 @@ const cheerio_1 = require("cheerio");
 const backlink_repo_1 = require("../../database/repos/backlink/backlink.repo");
 const import_attachment_service_1 = require("../../integrations/import/services/import-attachment.service");
 const environment_service_1 = require("../../integrations/environment/environment.service");
-const license_service_1 = require("../licence/license.service");
+const license_check_service_1 = require("../../integrations/environment/license-check.service");
 const feature_registry_1 = require("../licence/feature-registry");
 const page_service_1 = require("../../core/page/services/page.service");
 const event_emitter_1 = require("@nestjs/event-emitter");
@@ -41,13 +41,13 @@ const audit_events_1 = require("../../common/events/audit-events");
 const audit_service_1 = require("../../integrations/audit/audit.service");
 const confluence_import_utils_1 = require("./confluence-import.utils");
 let ConfluenceImportService = ConfluenceImportService_1 = class ConfluenceImportService {
-    constructor(importService, backlinkRepo, importAttachmentService, pageService, environmentService, licenseService, db, eventEmitter, auditService) {
+    constructor(importService, backlinkRepo, importAttachmentService, pageService, environmentService, licenseCheckService, db, eventEmitter, auditService) {
         this.importService = importService;
         this.backlinkRepo = backlinkRepo;
         this.importAttachmentService = importAttachmentService;
         this.pageService = pageService;
         this.environmentService = environmentService;
-        this.licenseService = licenseService;
+        this.licenseCheckService = licenseCheckService;
         this.db = db;
         this.eventEmitter = eventEmitter;
         this.auditService = auditService;
@@ -61,7 +61,7 @@ let ConfluenceImportService = ConfluenceImportService_1 = class ConfluenceImport
             .where('id', '=', fileTask.workspaceId)
             .executeTakeFirst();
         if (!this.environmentService.isCloud()) {
-            if (!this.licenseService.hasFeature(workspace.licenseKey, feature_registry_1.Feature.CONFLUENCE_IMPORT)) {
+            if (!this.licenseCheckService.hasFeature(workspace.licenseKey, feature_registry_1.Feature.CONFLUENCE_IMPORT)) {
                 throw new common_1.ForbiddenException('This feature requires a valid license.');
             }
         }
@@ -661,6 +661,6 @@ exports.ConfluenceImportService = ConfluenceImportService = ConfluenceImportServ
         import_attachment_service_1.ImportAttachmentService,
         page_service_1.PageService,
         environment_service_1.EnvironmentService,
-        license_service_1.LicenseService, Object, event_emitter_1.EventEmitter2, Object])
+        license_check_service_1.LicenseCheckService, Object, event_emitter_1.EventEmitter2, Object])
 ], ConfluenceImportService);
 //# sourceMappingURL=confluence-import.service.js.map

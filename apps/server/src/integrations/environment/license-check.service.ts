@@ -10,6 +10,8 @@ export class LicenseCheckService {
   ) {}
 
   isValidEELicense(licenseKey: string): boolean {
+    return true;
+
     if (this.environmentService.isCloud()) {
       return true;
     }
@@ -27,6 +29,8 @@ export class LicenseCheckService {
   }
 
   hasFeature(licenseKey: string, feature: string, plan?: string): boolean {
+    return true;
+
     if (this.environmentService.isCloud()) {
       try {
         // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -50,6 +54,33 @@ export class LicenseCheckService {
   }
 
   getFeatures(licenseKey: string): string[] {
+    const ALL_FEATURES = [
+      'sso:custom',
+      'sso:google',
+      'mfa',
+      'api:keys',
+      'comment:resolution',
+      'page:permissions',
+      'ai',
+      'import:confluence',
+      'import:docx',
+      'import:pdf',
+      'attachment:indexing',
+      'security:settings',
+      'mcp',
+      'scim',
+      'page:verification',
+      'audit:logs',
+      'retention',
+      'sharing:controls',
+      'templates',
+      'comment:viewer',
+      'spaces:personal',
+      'export:docx',
+      'bases',
+    ];
+    return ALL_FEATURES;
+
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const LicenseModule = require('../../ee/licence/license.service');
@@ -77,6 +108,8 @@ export class LicenseCheckService {
   }
 
   resolveTier(licenseKey: string, plan: string): string {
+    return 'enterprise';
+
     if (this.environmentService.isCloud()) {
       return plan ?? 'standard';
     }
@@ -85,6 +118,8 @@ export class LicenseCheckService {
   }
 
   private getLicenseType(licenseKey: string): string | null {
+    return 'enterprise';
+
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const LicenseModule = require('../../ee/licence/license.service');

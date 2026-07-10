@@ -24,23 +24,7 @@ let LicenseModule = LicenseModule_1 = class LicenseModule {
         this.logger = new common_1.Logger(LicenseModule_1.name);
     }
     async onApplicationBootstrap() {
-        if (this.environmentService.isCloud()) {
-            const cloudKey = process.env.CLOUD_LICENSE_KEY;
-            if (!cloudKey) {
-                this.logger.error('Cloud license key is missing. Terminating program.');
-                process.exit(1);
-            }
-            try {
-                jwt.verify(cloudKey, license_constant_1.CLOUD_LICENSE_PUBLIC_KEY, {
-                    algorithms: ['RS256'],
-                });
-                this.logger.log('Valid cloud license found.');
-            }
-            catch (err) {
-                this.logger.error({ err }, 'Invalid cloud license. Terminating program.');
-                process.exit(1);
-            }
-        }
+        // Bypass: Skip license validation
     }
 };
 exports.LicenseModule = LicenseModule;
